@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>431c447c-01b5-4e14-8488-f12d079bbb82</UserSecretsId>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AiPriceExtractionService.cs" />
+    <Compile Remove="Controllers\JobController.cs" />
+    <Compile Remove="Controllers\VendorProductPriceController.cs" />
+    <Compile Remove="IAiPriceExtractionService.cs" />
+    <Compile Remove="IWhatsAppService.cs" />
+    <Compile Remove="PriceUpdateRequestCommandHandler.cs" />
+    <Compile Remove="TriggerAllPriceUpdatesCommandHandler.cs" />
+    <Compile Remove="WebhookController.cs" />
+    <Compile Remove="WhatsAppService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JRM.Application\JRM.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+@TenderManagament_HostAddress = http://localhost:5177
+
+GET {{TenderManagament_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

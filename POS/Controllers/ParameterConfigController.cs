@@ -1,0 +1,35 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using JRM.API.Controllers.Base;
+using JRM.Application.Common.DTOs;
+using JRM.Application.Common.DTOs.ParametersConfiguration;
+using JRM.Application.Features.ParamterConfigs.Commands;
+using JRM.Application.Features.ParamterConfigs.Queries;
+
+
+namespace JRM.API.Controllers
+{
+  
+    public class ParameterConfigController : BaseApiController
+    {
+        [HttpGet]
+        [AllowAnonymous] // Parameters are often read by clients
+        [ProducesResponseType(typeof(ApiResponses<PaginationResponse<ParamterConfigListRespone>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponses<PaginationResponse<ParamterConfigListRespone>>>> GetAll([FromQuery] GetallParamterConfigsQyery query)
+            => BaseResponseHandler(await Mediator.Send(query));
+
+        [HttpPost("Create")]
+        [Authorize(Policy = "AdminOnly")]
+        [ProducesResponseType(typeof(ApiResponses<bool>), StatusCodes.Status201Created)]
+        public async Task<ActionResult<ApiResponses<bool>>> Create([FromBody] CreateParamterConfigCommand command)
+            => BaseResponseHandler(await Mediator.Send(command));
+
+        [HttpPut("Update")]
+        [Authorize(Policy = "AdminOnly")]
+        [ProducesResponseType(typeof(ApiResponses<bool>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponses<bool>>> Update(Guid id, [FromBody] UpdateParamterConfigCommand command)
+        {
+            return BaseResponseHandler(await Mediator.Send(command));
+        }
+    }
+}
