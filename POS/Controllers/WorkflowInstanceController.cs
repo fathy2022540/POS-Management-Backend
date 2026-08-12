@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Features.WorkflowInstanceServices.Commands.Create;
-using JRM.Application.Features.WorkflowInstanceServices.Commands.Delete;
-using JRM.Application.Features.WorkflowInstanceServices.Commands.Update;
-using JRM.Application.Features.WorkflowInstanceServices.Quieries;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.WorkflowInstanceServices.Commands.Create;
+using POS.Application.Features.WorkflowInstanceServices.Commands.Delete;
+using POS.Application.Features.WorkflowInstanceServices.Commands.Update;
+using POS.Application.Features.WorkflowInstanceServices.Quieries;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
     public class WorkflowInstanceController : BaseApiController
     {

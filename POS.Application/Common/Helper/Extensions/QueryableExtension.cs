@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using JRM.Application.Common.DTOs;
+using POS.Application.Common.DTOs;
 
-namespace JRM.Application.Common.Helper.Extensions
+namespace POS.Application.Common.Helper.Extensions
 {
     public static class QueryableExtension
     {

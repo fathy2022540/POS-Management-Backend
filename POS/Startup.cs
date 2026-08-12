@@ -1,15 +1,15 @@
-﻿using JRM.API.Middleware;
-using JRM.Application.Helper;
-using JRM.Infrastructure;
-using JRM.Infrastructure.UnitOfWork;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using POS.API.Middleware;
+using POS.Application.Helper;
+using POS.Infrastructure;
+using POS.Infrastructure.UnitOfWork;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace JRM.API
+namespace POS.API
 {
     public class Startup
     {
@@ -19,7 +19,7 @@ wmJG8wVQZKjeGcjDOL5UlsuusFncCzWBQ7RKNUSesmQRMSGkVb1/3j+skZ6UtW+5u09lHNsj6tQ5
 1s1SPrCBkedbNf0Tp0GbMJDyR4e9T04ZZwIDAQABAoGAFijko56+qGyN8M0RVyaRAXz++xTqHBLh
 3tx4VgMtrQ+WEgCjhoTwo23KMBAuJGSYnRmoBZM3lMfTKevIkAidPExvYCdm5dYq3XToLkkLv5L2
 pIIVOFMDG+KESnAFV7l2c+cnzRMW0+b6f8mR1CJzZuxVLL6Q02fvLi55/mbSYxECQQDeAw6fiIQX
-GukBI4eMZZt4nscy2o12KyYner3VpoeE+Np2q+Z3pvAMd/aNzQ/W9WaI+NRfcxUJrmfPwIGm63il
+GukBI4eMZZt4nscy2o12KyYner3VpoeE+Np2q+Z3pvAMd/aNzQ/W9WaI+NRfcxUPOSfPwIGm63il
 AkEAxCL5HQb2bQr4ByorcMWm/hEP2MZzROV73yF41hPsRC9m66KrheO9HPTJuo3/9s5p+sqGxOlF
 L0NDt4SkosjgGwJAFklyR1uZ/wPJjj611cdBcztlPdqoxssQGnh85BzCj/u3WqBpE2vjvyyvyI5k
 X6zk7S0ljKtt2jny2+00VsBerQJBAJGC1Mg5Oydo5NwD6BiROrPxGo2bpTbu/fhrT8ebHkTz2epl
@@ -45,13 +45,13 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
             services.AddSingleton(systemSettings);
             #endregion
             #region *****DbContext*****
-            services.AddDbContext<JRMDBContext>(m => m.UseSqlServer(systemSettings.AppSettingsConfiguration.ConnectionStrings, b => b.MigrationsAssembly(typeof(JRMDBContext).Assembly.FullName)), ServiceLifetime.Singleton);
+            services.AddDbContext<POSDBContext>(m => m.UseSqlServer(systemSettings.AppSettingsConfiguration.ConnectionStrings, b => b.MigrationsAssembly(typeof(POSDBContext).Assembly.FullName)), ServiceLifetime.Singleton);
 
-            services.AddScoped<DbContext, JRMDBContext>();
+            services.AddScoped<DbContext, POSDBContext>();
             #endregion
 
             #region *****Unit Of Work*****
-            services.AddScoped<IUnitOfWork<JRMDBContext>, UnitOfWork<JRMDBContext>>();
+            services.AddScoped<IUnitOfWork<POSDBContext>, UnitOfWork<POSDBContext>>();
             #endregion
 
             services.AddApplicationServices();
@@ -62,8 +62,6 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
 
 
             });
-
-
             #region *****Authentication*****
 
             //Configuration.Bind(nameof(systemSettings), systemSettings);
@@ -182,7 +180,7 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
 
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<JRMDBContext>();
+                var db = scope.ServiceProvider.GetRequiredService<POSDBContext>();
                 db.Database.Migrate();
             }
 

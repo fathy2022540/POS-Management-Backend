@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Mail;
 
-namespace JRM.Infrastructure.Services
+namespace POS.Infrastructure.Services
 {
     public interface IEmailNotificationService
     {

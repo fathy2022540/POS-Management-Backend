@@ -1,6 +1,6 @@
-using JRM.Application.Common.DTOs;
+using POS.Application.Common.DTOs;
 
-namespace JRM.Application.Helper
+namespace POS.Application.Helper
 {
     public class SystemSettingsConfiguration : IDisposable
     {

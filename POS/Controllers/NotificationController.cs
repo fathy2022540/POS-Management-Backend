@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Features.NotificationServices.Commands;
-using JRM.Application.Features.NotificationServices.Queries;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.NotificationServices.Commands;
+using POS.Application.Features.NotificationServices.Queries;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
     public class NotificationController : BaseApiController
     {

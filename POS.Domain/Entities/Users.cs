@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JRM.Domain.Entities
+namespace POS.Domain.Entities
 {
     public class Users : BaseEntity
     {
@@ -47,7 +47,6 @@ namespace JRM.Domain.Entities
         public string? ActivationToken { get; set; }
 
         public bool? AccountProfileActivated { get; set; }
-        public long? VendorId { get; set; }
         public long? RoleId { get; set; }
         public long? StatusId { get; set; }
         public long? UserTypeId { get; set; }

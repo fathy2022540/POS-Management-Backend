@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JRM.Domain.Entities
+namespace POS.Domain.Entities
 {
     public class Contact: BaseEntity
     {

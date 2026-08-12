@@ -1,4 +1,4 @@
-﻿namespace JRM.Domain.Entities
+﻿namespace POS.Domain.Entities
 {
     public class Roles : BaseEntity
     {

@@ -1,8 +1,8 @@
-﻿using JRM.Application.Common.Validators;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using POS.Application.Common.Validators;
 
-namespace JRM.API.Middleware
+namespace POS.API.Middleware
 {
     public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
     {
@@ -47,3 +47,4 @@ namespace JRM.API.Middleware
             return true;
         }
     }
+}

@@ -1,22 +1,22 @@
-// JRM.API/Controllers/PermissionsController.cs
+// POS.API/Controllers/PermissionsController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Features.PermissionServices.Queries;
-using JRM.Application.Features.PermissionServices.Commands;
-using JRM.Domain.Entities;
-using JRM.Infrastructure;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.PermissionServices.Queries;
+using POS.Application.Features.PermissionServices.Commands;
+using POS.Domain.Entities;
+using POS.Infrastructure;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
 
     public class PermissionsController : BaseApiController
     {
-        private readonly JRMDBContext _dbContext;
+        private readonly POSDBContext _dbContext;
 
-        public PermissionsController(JRMDBContext dbContext)
+        public PermissionsController(POSDBContext dbContext)
         {
             _dbContext = dbContext;
         }

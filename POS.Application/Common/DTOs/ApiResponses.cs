@@ -1,6 +1,6 @@
-﻿using JRM.Domain.Enums;
+﻿using POS.Domain.Enums;
 
-namespace JRM.Application.Common.DTOs
+namespace POS.Application.Common.DTOs
 {
 
     public class ApiResponses<T>

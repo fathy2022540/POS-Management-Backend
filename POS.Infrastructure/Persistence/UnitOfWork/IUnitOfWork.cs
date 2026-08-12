@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using JRM.Infrastructure.Repository;
+using POS.Infrastructure.Repository;
 
-namespace JRM.Infrastructure.UnitOfWork
+namespace POS.Infrastructure.UnitOfWork
 {
     public interface IUnitOfWork<TContext> where TContext : DbContext
     {

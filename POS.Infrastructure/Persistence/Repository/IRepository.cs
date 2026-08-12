@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
-namespace JRM.Infrastructure.Repository
+namespace POS.Infrastructure.Repository
 {
     public interface IRepository<T>
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Query;
 using System.Data;
 using System.Linq.Expressions;
 
-namespace JRM.Infrastructure.Repository
+namespace POS.Infrastructure.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {

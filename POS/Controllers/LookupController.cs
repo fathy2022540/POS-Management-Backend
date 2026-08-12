@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Features.LookupServices.Commands;
-using JRM.Application.Features.LookupServices.Queries;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.LookupServices.Commands;
+using POS.Application.Features.LookupServices.Queries;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
     public class LookupController : BaseApiController
     {

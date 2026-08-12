@@ -1,4 +1,4 @@
-﻿namespace JRM.Domain.Enums
+﻿namespace POS.Domain.Enums
 {
 
     public enum StatusResult

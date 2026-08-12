@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
 
-namespace JRM.Application.Common.Validators
+namespace POS.Application.Common.Validators
 {
     public class ValidationException : Exception
     {

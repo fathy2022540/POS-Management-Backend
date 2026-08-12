@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JRM.Domain.Entities
+namespace POS.Domain.Entities
 {
     public class WorkflowAction : BaseEntity
     {

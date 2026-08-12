@@ -1,10 +1,10 @@
-﻿using JRM.Domain.Entities;
+﻿using POS.Domain.Entities;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Security.Cryptography;
 
-namespace JRM.Infrastructure
+namespace POS.Infrastructure
 {
     public static class EntitiesSeedData
     {

@@ -1,18 +1,18 @@
 ﻿using MediatR;
 using Microsoft.IdentityModel.Tokens;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Common.Helper.Authentication;
-using JRM.Application.Helper.Mapper;
-using JRM.Domain.Entities;
-using JRM.Domain.Enums;
-using JRM.Infrastructure;
-using JRM.Infrastructure.UnitOfWork;
+using POS.Application.Common.DTOs;
+using POS.Application.Common.Helper.Authentication;
+using POS.Application.Helper.Mapper;
+using POS.Domain.Entities;
+using POS.Domain.Enums;
+using POS.Infrastructure;
+using POS.Infrastructure.UnitOfWork;
 
-namespace JRM.Application.Features.Authenticate
+namespace POS.Application.Features.Authenticate
 {
     public record RefreshTokenCommand(string AccessToken, string RefreshToken) : IRequest<ApiResponses<RefreshTokenModel>>;
 
-    public class RefreshTokenCommandHandler(ITokenService tokenService, IUnitOfWork<JRMDBContext> unitOfWork)
+    public class RefreshTokenCommandHandler(ITokenService tokenService, IUnitOfWork<POSDBContext> unitOfWork)
             : IRequestHandler<RefreshTokenCommand, ApiResponses<RefreshTokenModel>>
     {
         public async Task<ApiResponses<RefreshTokenModel>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)

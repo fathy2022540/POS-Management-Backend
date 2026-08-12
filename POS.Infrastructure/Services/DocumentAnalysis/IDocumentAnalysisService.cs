@@ -1,4 +1,4 @@
-namespace JRM.Infrastructure.Services.DocumentAnalysis
+namespace POS.Infrastructure.Services.DocumentAnalysis
 {
     public interface IDocumentAnalysisService
     {

@@ -1,13 +1,13 @@
 ﻿using MediatR;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Common.Helper.Authentication;
-using JRM.Application.Helper.Mapper;
-using JRM.Domain.Entities;
-using JRM.Domain.Enums;
-using JRM.Infrastructure;
-using JRM.Infrastructure.UnitOfWork;
+using POS.Application.Common.DTOs;
+using POS.Application.Common.Helper.Authentication;
+using POS.Application.Helper.Mapper;
+using POS.Domain.Entities;
+using POS.Domain.Enums;
+using POS.Infrastructure;
+using POS.Infrastructure.UnitOfWork;
 
-namespace JRM.Application.Features.Authenticate
+namespace POS.Application.Features.Authenticate
 {
 
     public record LoginCommand(string? username, string? password, bool RememberMe = false)
@@ -15,7 +15,7 @@ namespace JRM.Application.Features.Authenticate
 
     public record LoginResponse(long UserId, string UserName, string FullName, string AccessToken, string RefreshToken);
 
-    public class LoginCommandHandler(IUnitOfWork<JRMDBContext> unitOfWork, IPasswordHasher passwordHasher, ITokenService tokenService)
+    public class LoginCommandHandler(IUnitOfWork<POSDBContext> unitOfWork, IPasswordHasher passwordHasher, ITokenService tokenService)
         : IRequestHandler<LoginCommand, ApiResponses<LoginResponse>>
     {
         public async Task<ApiResponses<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)

@@ -1,9 +1,10 @@
-﻿namespace JRM.Domain.Enums
+﻿namespace POS.Domain.Enums
 {
     public enum UserType
     {
-        General = 1,
-        Vendor = 2
+        Administrator = 1,
+        Manager = 2,
+        Cashier = 3
     }
     public enum UserStatus
     {

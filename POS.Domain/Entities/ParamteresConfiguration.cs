@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JRM.Domain.Entities
+namespace POS.Domain.Entities
 {
     public partial class ParamteresConfiguration : BaseEntity
     {

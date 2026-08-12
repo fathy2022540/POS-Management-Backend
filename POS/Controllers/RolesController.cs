@@ -1,25 +1,19 @@
-// JRM.API/Controllers/RolesController.cs
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Features.LookupServices.Commands;
-using JRM.Application.Features.RolesServices.Commands;
-using JRM.Application.Features.RolesServices.Commands.Delete;
-using JRM.Application.Features.VendorServices.Commands;
-using JRM.Domain.Entities;
-using JRM.Infrastructure;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.RolesServices.Commands;
+using POS.Application.Features.RolesServices.Commands.Delete;
+using POS.Infrastructure;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
 
     public class RolesController : BaseApiController
     {
-        private readonly JRMDBContext _dbContext;
+        private readonly POSDBContext _dbContext;
 
-        public RolesController(JRMDBContext dbContext)
+        public RolesController(POSDBContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -87,7 +81,7 @@ namespace JRM.API.Controllers
         public async Task<ActionResult<ApiResponses<bool>>> Update([FromBody] UpdateRoleCommand command)
                 => BaseResponseHandler(await Mediator.Send(command));
 
-        
+
         [HttpDelete("Delete/{id}")]
         [ProducesResponseType(typeof(ApiResponses<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponses<bool>), StatusCodes.Status400BadRequest)]

@@ -1,4 +1,4 @@
-﻿namespace JRM.Application.Common.Helper
+﻿namespace POS.Application.Common.Helper
 {
     public static class CommonHelper
     {

@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using JRM.Domain.Entities;
-using JRM.Infrastructure.Repository;
+using POS.Domain.Entities;
+using POS.Infrastructure.Repository;
 
-namespace JRM.Application.Common.Helper
+namespace POS.Application.Common.Helper
 {
     public static class BusinessValidator
     {

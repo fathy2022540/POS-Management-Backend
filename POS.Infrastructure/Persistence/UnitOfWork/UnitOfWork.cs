@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using JRM.Infrastructure.Repository;
+using POS.Infrastructure.Repository;
 
-namespace JRM.Infrastructure.UnitOfWork
+namespace POS.Infrastructure.UnitOfWork
 {
     public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
     {

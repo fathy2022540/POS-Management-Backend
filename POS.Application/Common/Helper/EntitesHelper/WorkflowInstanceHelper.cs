@@ -1,9 +1,9 @@
-using JRM.Application.Common.DTOs;
-using JRM.Domain.Entities;
-using JRM.Domain.Enums;
-using JRM.Infrastructure.Repository;
+using POS.Application.Common.DTOs;
+using POS.Domain.Entities;
+using POS.Domain.Enums;
+using POS.Infrastructure.Repository;
 
-namespace JRM.Application.Common.Helper.EntitesHelper
+namespace POS.Application.Common.Helper.EntitesHelper
 {
     public static class WorkflowInstanceHelper
     {

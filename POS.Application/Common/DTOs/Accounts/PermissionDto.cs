@@ -1,7 +1,7 @@
-// JRM.Application/Common/DTOs/Permission/PermissionDto.cs
+// POS.Application/Common/DTOs/Permission/PermissionDto.cs
 using System;
 
-namespace JRM.Application.Common.DTOs
+namespace POS.Application.Common.DTOs
 {
     public class PermissionDto
     {

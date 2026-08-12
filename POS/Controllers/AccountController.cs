@@ -1,27 +1,24 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Common.Helper;
-using JRM.Application.Features.Authenticate;
-using JRM.Application.Features.UserAccount.Commands;
-using JRM.Application.Features.UsersAccount.Queries;
-using JRM.Domain.Entities;
-using JRM.Domain.Enums;
-using JRM.Infrastructure;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Features.Authenticate;
+using POS.Application.Features.UserAccount.Commands;
+using POS.Application.Features.UsersAccount.Queries;
+using POS.Domain.Enums;
+using POS.Infrastructure;
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : BaseApiController
     {
-        private readonly JRMDBContext _dbContext;
+        private readonly POSDBContext _dbContext;
         private readonly IPasswordHasher _passwordHasher;
 
-        public AccountController(JRMDBContext dbContext, IPasswordHasher passwordHasher)
+        public AccountController(POSDBContext dbContext, IPasswordHasher passwordHasher)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
@@ -80,7 +77,6 @@ namespace JRM.API.Controllers
             var query = _dbContext.Users
                 .AsNoTracking()
                 .Include(u => u.Roles)
-                .Include(u => u.Vendor)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(normalizedSearch))
@@ -89,8 +85,9 @@ namespace JRM.API.Controllers
                     (u.FullName != null && EF.Functions.Like(u.FullName, $"%{normalizedSearch}%")) ||
                     (u.Email != null && EF.Functions.Like(u.Email, $"%{normalizedSearch}%")) ||
                     (u.UserName != null && EF.Functions.Like(u.UserName, $"%{normalizedSearch}%")) ||
-                    (u.Roles != null && u.Roles.NameEn != null && EF.Functions.Like(u.Roles.NameEn, $"%{normalizedSearch}%")) ||
-                    (u.Vendor != null && u.Vendor.VendorName != null && EF.Functions.Like(u.Vendor.VendorName, $"%{normalizedSearch}%")));
+                    (u.Roles != null && u.Roles.NameEn != null && EF.Functions.Like(u.Roles.NameEn, $"%{normalizedSearch}%")));
+
+
             }
 
             var users = await query
@@ -105,12 +102,7 @@ namespace JRM.API.Controllers
                     roleId = u.RoleId,
                     role = u.Roles != null ? u.Roles.NameEn : string.Empty,
                     department = string.Empty,
-                    userType = u.VendorId.HasValue ? "vendor" : "general",
                     isActive = u.IsActive,
-                    vendorId = u.VendorId,
-                    vendorName = u.Vendor != null ? u.Vendor.VendorName : null,
-                    crNumber = u.Vendor != null ? u.Vendor.CommercialRegistrationNumber : null,
-                    taxNumber = u.Vendor != null ? u.Vendor.TaxNumber : null,
                     documentName = string.Empty,
                     createdDate = u.CreatedDate
                 })
@@ -133,7 +125,6 @@ namespace JRM.API.Controllers
         {
             var normalizedRequest = NormalizeRequest(request);
             var user = await _dbContext.Users
-                .Include(u => u.Vendor)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
@@ -148,8 +139,6 @@ namespace JRM.API.Controllers
             }
 
             var (firstName, lastName) = SplitName(normalizedRequest.FullName);
-            var previousVendorId = user.VendorId;
-            var vendor = await UpsertVendorAsync(user.Vendor, normalizedRequest);
 
             user.FullName = normalizedRequest.FullName;
             user.FirstName = firstName;
@@ -159,15 +148,9 @@ namespace JRM.API.Controllers
             user.Mobile = normalizedRequest.Phone;
             user.RoleId = normalizedRequest.RoleId;
             user.IsActive = normalizedRequest.IsActive;
-            user.Vendor = vendor;
-            user.VendorId = vendor?.Id;
             user.ModifiedDate = DateTime.UtcNow;
             user.ModifiedBy = 1;
 
-            if (normalizedRequest.UserType == "general" && previousVendorId.HasValue)
-            {
-                await RemoveVendorIfOrphanAsync(previousVendorId.Value, id);
-            }
 
             await _dbContext.SaveChangesAsync();
             return BaseResponseHandler(ApiResponses<bool>.Success(true, "User updated successfully."));
@@ -183,16 +166,10 @@ namespace JRM.API.Controllers
                 return BaseResponseHandler(ApiResponses<bool>.Failure(StatusResult.NotFound, "User not found."));
             }
 
-            var vendorId = user.VendorId;
-
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync();
 
-            if (vendorId.HasValue)
-            {
-                await RemoveVendorIfOrphanAsync(vendorId.Value, id);
-                await _dbContext.SaveChangesAsync();
-            }
+
 
             return BaseResponseHandler(ApiResponses<bool>.Success(true, "User deleted successfully."));
         }
@@ -219,57 +196,6 @@ namespace JRM.API.Controllers
             return (firstName, lastName);
         }
 
-        private async Task<Vendors?> UpsertVendorAsync(Vendors? vendor, UserManagementRequest request)
-        {
-            if (request.UserType != "vendor")
-            {
-                return null;
-            }
-
-            if (vendor == null)
-            {
-                vendor = new Vendors
-                {
-                    VendorCode = $"V-{DateTime.UtcNow.Ticks}",
-                    IsApproved = true,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedBy = 1
-                };
-
-                await _dbContext.Vendors.AddAsync(vendor);
-            }
-            else
-            {
-                vendor.ModifiedDate = DateTime.UtcNow;
-                vendor.ModifiedBy = 1;
-            }
-
-            var vendorName = string.IsNullOrWhiteSpace(request.VendorName) ? request.FullName : request.VendorName;
-
-            vendor.VendorName = vendorName;
-            vendor.VendorNameAR = vendorName;
-            vendor.TaxNumber = request.TaxNumber ?? string.Empty;
-            vendor.CommercialRegistrationNumber = request.CrNumber ?? string.Empty;
-            vendor.Email = request.Email;
-            vendor.Mobile = request.Phone;
-
-            return vendor;
-        }
-
-        private async Task RemoveVendorIfOrphanAsync(long vendorId, long currentUserId)
-        {
-            var stillReferenced = await _dbContext.Users.AnyAsync(u => u.Id != currentUserId && u.VendorId == vendorId);
-            if (stillReferenced)
-            {
-                return;
-            }
-
-            var vendor = await _dbContext.Vendors.FirstOrDefaultAsync(v => v.Id == vendorId);
-            if (vendor != null)
-            {
-                _dbContext.Vendors.Remove(vendor);
-            }
-        }
 
         public class UserManagementRequest
         {

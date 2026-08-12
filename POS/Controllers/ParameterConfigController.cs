@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JRM.API.Controllers.Base;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Common.DTOs.ParametersConfiguration;
-using JRM.Application.Features.ParamterConfigs.Commands;
-using JRM.Application.Features.ParamterConfigs.Queries;
+using POS.API.Controllers.Base;
+using POS.Application.Common.DTOs;
+using POS.Application.Common.DTOs.ParametersConfiguration;
+using POS.Application.Features.ParamterConfigs.Commands;
+using POS.Application.Features.ParamterConfigs.Queries;
 
 
-namespace JRM.API.Controllers
+namespace POS.API.Controllers
 {
   
     public class ParameterConfigController : BaseApiController

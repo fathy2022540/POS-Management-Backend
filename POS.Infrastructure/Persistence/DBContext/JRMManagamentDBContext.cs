@@ -1,13 +1,13 @@
-using JRM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using static JRM.Infrastructure.EntitiesSeedData;
+using POS.Domain.Entities;
+using static POS.Infrastructure.EntitiesSeedData;
 
-namespace JRM.Infrastructure
+namespace POS.Infrastructure
 {
-    public partial class JRMDBContext : DbContext
+    public partial class POSDBContext : DbContext
     {
 
-        public JRMDBContext(DbContextOptions<JRMDBContext> options) : base(options)
+        public POSDBContext(DbContextOptions<POSDBContext> options) : base(options)
         {
 
         }
@@ -21,79 +21,12 @@ namespace JRM.Infrastructure
             //modelBuilder.ApplyConfiguration(new LookupItemsSeedData());
 
 
-            // ==========================================
-            // DECIMAL PRECISION (For financial accuracy)
-            // ==========================================
-            modelBuilder.Entity<Journey>().Property(j => j.Price).HasPrecision(18, 2);
-            modelBuilder.Entity<Reservation>().Property(r => r.TotalPrice).HasPrecision(18, 2);
-            modelBuilder.Entity<HotelReservation>().Property(hr => hr.RoomPriceTotal).HasPrecision(18, 2);
-            modelBuilder.Entity<Hotels>().Property(h => h.BaseSinglePrice).HasPrecision(18, 2);
-            modelBuilder.Entity<Hotels>().Property(h => h.BaseDoublePrice).HasPrecision(18, 2);
-            modelBuilder.Entity<Hotels>().Property(h => h.BaseTriplePrice).HasPrecision(18, 2);
 
-            // ==========================================
-            // MANY-TO-MANY: Reservation <-> Seats
-            // ==========================================
-            modelBuilder.Entity<ReservationSeat>()
-                .HasKey(rs => new { rs.ReservationId, rs.SeatId }); // Composite Key
-
-            modelBuilder.Entity<ReservationSeat>()
-                .HasOne(rs => rs.Reservation)
-                .WithMany(r => r.ReservedSeats)
-                .HasForeignKey(rs => rs.ReservationId)
-                .OnDelete(DeleteBehavior.Cascade); // Deleting a reservation frees the seats
-
-            modelBuilder.Entity<ReservationSeat>()
-                .HasOne(rs => rs.Seat)
-                .WithMany(s => s.ReservationSeats)
-                .HasForeignKey(rs => rs.SeatId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a seat if it has booking history
-
-            // ==========================================
-            // ONE-TO-MANY & NULLABLE RELATIONSHIPS
-            // ==========================================
-
-            // Journey -> Bus (Nullable)
-            modelBuilder.Entity<Journey>()
-                .HasOne(j => j.Bus)
-                .WithMany(b => b.Journeys)
-                .HasForeignKey(j => j.BusId)
-                .OnDelete(DeleteBehavior.SetNull); // If a bus is retired/deleted, keep the journey but unassign the bus
-
-            // Journey -> Hotel (Nullable)
-            modelBuilder.Entity<Journey>()
-                .HasOne(j => j.Hotel)
-                .WithMany(h => h.Journeys)
-                .HasForeignKey(j => j.HotelId)
-                .OnDelete(DeleteBehavior.SetNull); // If a hotel is removed, keep the journey but unassign the hotel
-
-            // Journey -> JourneyProgram
-            modelBuilder.Entity<JourneyProgram>()
-                .HasOne(jp => jp.Journey)
-                .WithMany(j => j.Programs)
-                .HasForeignKey(jp => jp.JourneyId)
-                .OnDelete(DeleteBehavior.Cascade); // Deleting a journey deletes its daily itinerary
-
-            // Reservation -> HotelReservation
-            modelBuilder.Entity<HotelReservation>()
-                .HasOne(hr => hr.Reservation)
-                .WithMany(r => r.HotelReservations)
-                .HasForeignKey(hr => hr.ReservationId)
-                .OnDelete(DeleteBehavior.Cascade); // Canceling/deleting the main reservation deletes the room booking
 
             // ==========================================
             // UNIQUE CONSTRAINTS
             // ==========================================
 
-            // Ensure that a Seat Number is unique per Bus (e.g., Bus 1 can't have two "1A" seats)
-            modelBuilder.Entity<Seat>()
-                .HasIndex(s => new { s.BusId, s.SeatNumber })
-                .IsUnique();
-
-            // Ensure daily program days do not overlap within the same journey
-            modelBuilder.Entity<JourneyProgram>()
-                .HasIndex(jp => new { jp.JourneyId, jp.DayNumber })
-                .IsUnique();
 
             modelBuilder.Entity<Users>(builder =>
             {
@@ -234,19 +167,7 @@ namespace JRM.Infrastructure
         public DbSet<UserScreenPermissionOverrides> UserScreenPermissionOverrides { get; set; }
         public DbSet<Lookup> Lookup { get; set; }
         public DbSet<LookupItems> LookupItems { get; set; }
-        public DbSet<Company> Company { get; set; }
-        public DbSet<Bus> Bus { get; set; }
-        public DbSet<Seat> Seat { get; set; }
-        public DbSet<Hotels> Hotels { get; set; }
-        public DbSet<Journey> Journey { get; set; }
 
-
-        public DbSet<JourneyProgram> JourneyProgram { get; set; }
-
-        public DbSet<Reservation> Reservation { get; set; }
-        public DbSet<ReservationSeat> ReservationSeat { get; set; }
-        public DbSet<HotelReservation> HotelReservation { get; set; }
-        public DbSet<TourRequest> TourRequest { get; set; }
         public DbSet<AuditLog> AuditLog { get; set; }
         public DbSet<WorkflowAction> WorkflowAction { get; set; }
         public DbSet<WorkflowInstance> WorkflowInstance { get; set; }

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Mscc.GenerativeAI;
 
-namespace JRM.Infrastructure.Services.DocumentAnalysis
+namespace POS.Infrastructure.Services.DocumentAnalysis
 {
     public class DocumentAnalysisService : IDocumentAnalysisService
     {

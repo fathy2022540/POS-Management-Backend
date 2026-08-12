@@ -1,7 +1,7 @@
 using AutoMapper;
-using JRM.Application.Mappers;
+using POS.Application.Mappers;
 
-namespace JRM.Application.Helper.Mapper
+namespace POS.Application.Helper.Mapper
 {
     public class AppMapper
     {

@@ -5,9 +5,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
-using JRM.Application.Common.DTOs;
-using JRM.Application.Helper;
-namespace JRM.Application.Common.Helper.Authentication
+using POS.Application.Common.DTOs;
+using POS.Application.Helper;
+namespace POS.Application.Common.Helper.Authentication
 {
     public interface ITokenService
     {

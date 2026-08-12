@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace JRM.Application.Common.Helper
+namespace POS.Application.Common.Helper
 {
     /// <summary>
     /// Helper class for vendor-related operations

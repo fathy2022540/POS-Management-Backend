@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JRM.Application.Common.DTOs;
+using POS.Application.Common.DTOs;
 
-namespace JRM.API.Controllers.Base
+namespace POS.API.Controllers.Base
 {
     [Authorize]
     [Route("api/[controller]")]

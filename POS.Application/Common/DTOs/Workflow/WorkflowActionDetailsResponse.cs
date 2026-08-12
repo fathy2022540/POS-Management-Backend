@@ -1,4 +1,4 @@
-namespace JRM.Application.Common.DTOs
+namespace POS.Application.Common.DTOs
 {
     public class WorkflowActionDetailsResponse
     {
