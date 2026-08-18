@@ -1,4 +1,3 @@
-using System;
 using POS.Domain.Enums;
 
 namespace POS.Domain.Entities
@@ -10,8 +9,10 @@ namespace POS.Domain.Entities
 
         public decimal QuantityChanged { get; set; }
         public TransactionType Type { get; set; }
-        
+
         public long? ReferenceOrderId { get; set; }
+        public Order? ReferenceOrder { get; set; }
+
         public string Remarks { get; set; } = string.Empty;
     }
 }

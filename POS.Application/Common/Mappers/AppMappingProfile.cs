@@ -1,8 +1,7 @@
 using AutoMapper;
-using Pos.Application.Common.DTOs;
-using Pos.Application.Features.Orders.Commands;
-using Pos.Application.Features.Products.Commands;
 using POS.Application.Common.DTOs;
+using POS.Application.Common.DTOs.POS;
+using POS.Application.Features.Products.Commands;
 using POS.Application.Common.Helper;
 using POS.Application.Features.LookupServices.Commands;
 using POS.Application.Features.ParamterConfigs.Commands;
@@ -59,16 +58,17 @@ namespace POS.Application.Mappers
             #endregion
 
             #region Orders
-            CreateMap<OrderDto, OrderItem>().ReverseMap();
+            CreateMap<OrderItemDto, OrderItem>();
+            CreateMap<OrderItem, OrderItemDto>();
 
-            // Map the main Command to the Order Entity
-            CreateMap<CreateOrderCommand, Order>()
-                // Map the incoming Items list to the OrderItems navigation property
-                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.Items))
-                // Ignore business logic fields that we will set dynamically in the handler
-                .ForMember(dest => dest.OrderNumber, opt => opt.Ignore())
-                .ForMember(dest => dest.Status, opt => opt.Ignore());
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedDate))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderItems));
 
+            CreateMap<Payment, PaymentResultDto>()
+                .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method.ToString()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
             #endregion
 
             #region ProductItems

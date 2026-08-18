@@ -1,7 +1,8 @@
 using FluentValidation;
-using Pos.Application.Features.Orders.Commands;
+using POS.Application.Common.DTOs.POS;
+using POS.Application.Features.POS.Orders.Commands;
 
-namespace POS.Application.Features.Orders.Commands
+namespace POS.Application.Features.POS.Orders.Validators
 {
     public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
     {
@@ -12,17 +13,22 @@ namespace POS.Application.Features.Orders.Commands
                 .NotEmpty()
                 .WithMessage("At least one order item is required.");
 
-            RuleFor(x => x.TotalAmount)
-                .GreaterThan(0);
+            RuleForEach(x => x.Items)
+                .SetValidator(new OrderItemDtoValidator());
+        }
+    }
 
-            RuleForEach(x => x.Items).ChildRules(item =>
-            {
-                item.RuleFor(x => x.Id)
-                    .GreaterThan(0);
+    internal sealed class OrderItemDtoValidator : AbstractValidator<OrderItemDto>
+    {
+        public OrderItemDtoValidator()
+        {
+            RuleFor(x => x.ProductId)
+                .GreaterThan(0)
+                .WithMessage("ProductId is required.");
 
-                item.RuleFor(x => x.TotalAmount)
-                    .GreaterThanOrEqualTo(0);
-            });
+            RuleFor(x => x.Quantity)
+                .GreaterThan(0)
+                .WithMessage("Quantity must be greater than zero.");
         }
     }
 }

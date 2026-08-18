@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using POS.Application.Common.DTOs;
-using POS.Application.Common.DTOs.ParametersConfiguration;
 using POS.Application.Helper.Mapper;
 using POS.Domain.Enums;
 using POS.Infrastructure;
@@ -18,7 +17,7 @@ namespace POS.Application.Features.ParamterConfigs.Queries
             var repo = unitOfWork.GetRepository<Domain.Entities.ParamteresConfiguration>();
 
             var entity = await repo.GetFirstOrDefault<Domain.Entities.ParamteresConfiguration>(
-                selector: null, 
+                selector: null,
                 predicate: x => x.Id == request.Id,
                 orderBy: null,
                 include: null,

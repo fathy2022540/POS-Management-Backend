@@ -6,7 +6,7 @@ using POS.Domain.Enums;
 using POS.Infrastructure;
 using POS.Infrastructure.UnitOfWork;
 
-namespace Pos.Application.Features.Products.Commands
+namespace POS.Application.Features.Products.Commands
 {
     public record UpdateProductCommand(UpdateProductDto product) : IRequest<ApiResponses<bool>>;
     public class UpdateProductCommandHandler(IUnitOfWork<POSDBContext> unitOfWork)

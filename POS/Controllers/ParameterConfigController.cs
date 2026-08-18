@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using POS.API.Controllers.Base;
 using POS.Application.Common.DTOs;
-using POS.Application.Common.DTOs.ParametersConfiguration;
 using POS.Application.Features.ParamterConfigs.Commands;
 using POS.Application.Features.ParamterConfigs.Queries;
 
 
 namespace POS.API.Controllers
 {
-  
+
     public class ParameterConfigController : BaseApiController
     {
         [HttpGet]

@@ -1,4 +1,5 @@
 using FluentValidation;
+using POS.Application.Features.Products.Commands;
 
 namespace POS.Application.Features.Products.Commands
 {

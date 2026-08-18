@@ -1,42 +1,64 @@
 using MediatR;
-using Pos.Application.Common.DTOs;
 using POS.Application.Common.DTOs;
-using POS.Application.Common.Helper;
-using POS.Application.Helper.Mapper;
-using POS.Domain.Entities;
-using POS.Domain.Enums;
-using POS.Infrastructure;
-using POS.Infrastructure.UnitOfWork;
+using POS.Application.Common.DTOs.POS;
+using POS.Application.Common.Interfaces;
+using POS.Domain.Exceptions;
+using POS.Domain.Repositories;
+using POS.Domain.ValueObjects;
 
-namespace Pos.Application.Features.Orders.Commands
+namespace POS.Application.Features.POS.Orders.Commands
 {
-    public class CreateOrderCommand : IRequest<ApiResponses<string>>
+    public class CreateOrderCommand : IRequest<ApiResponses<CreateOrderResultDto>>
     {
-        public List<OrderDto> Items { get; set; } = new();
-        public decimal TotalAmount { get; set; }
+        public List<OrderItemDto> Items { get; set; } = [];
     }
-    public class CreateOrderCommandHandler(IUnitOfWork<POSDBContext> unitOfWork)
-        : IRequestHandler<CreateOrderCommand, ApiResponses<string>>
+
+    public class CreateOrderCommandHandler(
+        IPosUnitOfWork unitOfWork,
+        IDomainEventDispatcher domainEventDispatcher)
+        : IRequestHandler<CreateOrderCommand, ApiResponses<CreateOrderResultDto>>
     {
-
-
-        public async Task<ApiResponses<string>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponses<CreateOrderResultDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
-   
+            try
+            {
+                var lines = new List<(long ProductId, int Quantity, Money UnitPrice)>();
 
-            var orderRepo = unitOfWork.GetRepository<Order>();
-            var neworder = AppMapper.Mapper.Map<Order>(request.Items);
+                foreach (var item in request.Items)
+                {
+                    var product = await unitOfWork.Products.GetByIdAsync(item.ProductId, cancellationToken);
+                    if (product is null)
+                    {
+                        return ApiResponses<CreateOrderResultDto>.Failure(
+                            Domain.Enums.StatusResult.NotFound,
+                            $"Product with id {item.ProductId} was not found.");
+                    }
 
-            // 2. Apply business rules explicitly
-            neworder.OrderNumber = $"ORD-{DateTime.UtcNow.Ticks}";
-            neworder.Status = OrderStatus.Paid;
-            await orderRepo.Insert(neworder);
-            await unitOfWork.DoWork();
-            
-            // Note: In a full event-driven system, you would raise an OrderCompletedEvent here
-            // to trigger the inventory deduction asynchronously.
-            
-            return ApiResponses<string>.Success(neworder.OrderNumber, "Order created successfully.");
+                    lines.Add((product.Id, item.Quantity, new Money(product.Price)));
+                }
+
+                var order = Domain.Entities.Order.Create(OrderNumber.Generate(), lines);
+
+                await unitOfWork.Orders.AddAsync(order, cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                order.NotifyCreated();
+                await domainEventDispatcher.DispatchEventsAsync(order, cancellationToken);
+
+                var result = new CreateOrderResultDto
+                {
+                    OrderId = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    TotalAmount = order.TotalAmount,
+                    Status = order.Status.ToString()
+                };
+
+                return ApiResponses<CreateOrderResultDto>.Success(result, "Order created successfully. Awaiting payment.");
+            }
+            catch (DomainException ex)
+            {
+                return ApiResponses<CreateOrderResultDto>.Failure(Domain.Enums.StatusResult.BadRequest, ex.Message);
+            }
         }
     }
 }

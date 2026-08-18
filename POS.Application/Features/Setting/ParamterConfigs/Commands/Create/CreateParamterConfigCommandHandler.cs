@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using POS.Application.Common.DTOs;
-using POS.Application.Common.DTOs.ParametersConfiguration;
 using POS.Application.Helper.Mapper;
 using POS.Domain.Entities;
 using POS.Infrastructure;
@@ -13,7 +12,7 @@ namespace POS.Application.Features.ParamterConfigs.Commands
         string? DescriptionEn,
         string? DescriptionAr,
         string? ContentEn,
-        string? ContentAr,string? URL) : IRequest<ApiResponses<bool>>;
+        string? ContentAr, string? URL) : IRequest<ApiResponses<bool>>;
 
     public class CreateParamterConfigCommandHandler(IUnitOfWork<POSDBContext> unitOfWork) : IRequestHandler<CreateParamterConfigCommand, ApiResponses<bool>>
     {

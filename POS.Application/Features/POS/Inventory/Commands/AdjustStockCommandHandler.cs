@@ -1,46 +1,38 @@
 using MediatR;
 using POS.Application.Common.DTOs;
-using POS.Domain.Entities;
 using POS.Domain.Enums;
-using POS.Infrastructure;
-using POS.Infrastructure.UnitOfWork;
+using POS.Domain.Exceptions;
+using POS.Domain.Repositories;
 
-namespace POS.Application.Features.Inventory.Commands
+namespace POS.Application.Features.POS.Inventory.Commands
 {
     public record AdjustStockCommand(CreateStockDto CreateStockDto) : IRequest<ApiResponses<bool>>;
-    public class AdjustStockCommandHandler(IUnitOfWork<POSDBContext> unitOfWork)
+
+    public class AdjustStockCommandHandler(IPosUnitOfWork unitOfWork)
         : IRequestHandler<AdjustStockCommand, ApiResponses<bool>>
     {
-
         public async Task<ApiResponses<bool>> Handle(AdjustStockCommand request, CancellationToken cancellationToken)
         {
-            var InventoryRepo = unitOfWork.GetRepository<InventoryItem>();
-            var stockTransRepo = unitOfWork.GetRepository<StockTransaction>();
-            var item = await InventoryRepo.GetFirstOrDefault<InventoryItem>(selector: null,
-                          predicate: x => x.Id == request.CreateStockDto.InventoryItemId,
-                          orderBy: null,
-                          include: null,
-                          disableTracking: false
-                          );
-            if (item == null) return ApiResponses<bool>.Failure(StatusResult.NotFound, "Inventory item not found.");
-
-            var transaction = new StockTransaction
+            try
             {
-                InventoryItemId = request.CreateStockDto.InventoryItemId,
-                QuantityChanged = request.CreateStockDto.QuantityChanged,
-                Type = request.CreateStockDto.Type,
-                Remarks = request.CreateStockDto.Remarks
-            };
+                var item = await unitOfWork.Inventory.GetByIdAsync(request.CreateStockDto.InventoryItemId, cancellationToken);
+                if (item is null)
+                    return ApiResponses<bool>.Failure(StatusResult.NotFound, "Inventory item not found.");
 
-            item.CurrentStock += request.CreateStockDto.QuantityChanged;
+                item.AdjustStock(
+                    request.CreateStockDto.QuantityChanged,
+                    request.CreateStockDto.Type,
+                    request.CreateStockDto.Remarks);
 
+                await unitOfWork.Inventory.UpdateAsync(item, cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await stockTransRepo.Insert(transaction);
-            await unitOfWork.DoWork();
-
-
-            return ApiResponses<bool>.Success(true, "Stock adjusted successfully.");
-
+                return ApiResponses<bool>.Success(true, "Stock adjusted successfully.");
+            }
+            catch (DomainException ex)
+            {
+                return ApiResponses<bool>.Failure(StatusResult.BadRequest, ex.Message);
+            }
         }
     }
 }

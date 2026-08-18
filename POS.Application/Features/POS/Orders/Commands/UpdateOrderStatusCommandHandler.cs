@@ -1,35 +1,47 @@
 using MediatR;
 using POS.Application.Common.DTOs;
-using POS.Domain.Entities;
 using POS.Domain.Enums;
-using POS.Infrastructure;
-using POS.Infrastructure.UnitOfWork;
+using POS.Domain.Exceptions;
+using POS.Domain.Repositories;
 
-
-namespace Pos.Application.Features.Orders.Commands
+namespace POS.Application.Features.POS.Orders.Commands
 {
-    public record UpdateOrderStatusCommand(long id, OrderStatus NewStatus) : IRequest<ApiResponses<bool>>;
+    public record UpdateOrderStatusCommand(long Id, OrderStatus NewStatus) : IRequest<ApiResponses<bool>>;
 
-    public class UpdateOrderStatusCommandHandler(IUnitOfWork<POSDBContext> unitOfWork) : IRequestHandler<UpdateOrderStatusCommand, ApiResponses<bool>>
+    public class UpdateOrderStatusCommandHandler(IPosUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateOrderStatusCommand, ApiResponses<bool>>
     {
-
-
         public async Task<ApiResponses<bool>> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
         {
-            var orderRepo = unitOfWork.GetRepository<Order>();
+            try
+            {
+                var order = await unitOfWork.Orders.GetByIdWithItemsAsync(request.Id, cancellationToken);
+                if (order is null)
+                    return ApiResponses<bool>.Failure(StatusResult.NotFound, "Order not found.");
 
+                switch (request.NewStatus)
+                {
+                    case OrderStatus.Cancelled:
+                        order.Cancel();
+                        break;
+                    case OrderStatus.Refunded:
+                        order.Refund();
+                        break;
+                    default:
+                        return ApiResponses<bool>.Failure(
+                            StatusResult.BadRequest,
+                            "Status changes must go through domain workflows (Cancel, Refund, or ProcessPayment).");
+                }
 
-            var existingOrder = await orderRepo.Find(request.id);
-            if (existingOrder == null)
-                return ApiResponses<bool>.Failure(StatusResult.NotFound, "Order not found.");
+                await unitOfWork.Orders.UpdateAsync(order, cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            existingOrder.Status = request.NewStatus;
-
-            await orderRepo.Update(existingOrder);
-            await unitOfWork.DoWork();
-
-            return ApiResponses<bool>.Success(true, "Order updated successfully.");
-
+                return ApiResponses<bool>.Success(true, "Order updated successfully.");
+            }
+            catch (DomainException ex)
+            {
+                return ApiResponses<bool>.Failure(StatusResult.BadRequest, ex.Message);
+            }
         }
     }
 }

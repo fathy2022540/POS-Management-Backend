@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using POS.API.Middleware;
 using POS.Application.Helper;
 using POS.Infrastructure;
 using POS.Infrastructure.UnitOfWork;
-using System.Reflection;
-using System.Security.Cryptography;
 
 namespace POS.API
 {
@@ -45,7 +41,9 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
             services.AddSingleton(systemSettings);
             #endregion
             #region *****DbContext*****
-            services.AddDbContext<POSDBContext>(m => m.UseSqlServer(systemSettings.AppSettingsConfiguration.ConnectionStrings, b => b.MigrationsAssembly(typeof(POSDBContext).Assembly.FullName)), ServiceLifetime.Singleton);
+            services.AddDbContext<POSDBContext>(options => options.UseSqlServer(
+        systemSettings.AppSettingsConfiguration.ConnectionStrings,
+        sql => sql.MigrationsAssembly(typeof(POSDBContext).Assembly.FullName)));
 
             services.AddScoped<DbContext, POSDBContext>();
             #endregion
@@ -56,47 +54,42 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
 
             services.AddApplicationServices();
 
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 
-
-            });
             #region *****Authentication*****
 
             //Configuration.Bind(nameof(systemSettings), systemSettings);
             //services.AddSingleton(systemSettings);
 
             //// Load the RSA private key
-            var rsa = RSA.Create();
-            rsa.ImportRSAPrivateKey(Convert.FromBase64String(privateKey), out _);
+            //var rsa = RSA.Create();
+            //rsa.ImportRSAPrivateKey(Convert.FromBase64String(privateKey), out _);
 
-            //// Extract public key from private key
-            var rsaParameters = rsa.ExportParameters(false);
-            var publicKey = new RsaSecurityKey(rsaParameters);
+            ////// Extract public key from private key
+            //var rsaParameters = rsa.ExportParameters(false);
+            //var publicKey = new RsaSecurityKey(rsaParameters);
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.SaveToken = true;
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidIssuer = systemSettings.JWTConfiguration.ValidIssuer,
-                    ValidAudience = systemSettings.JWTConfiguration.ValidAudience,
-                    IssuerSigningKey = publicKey, // Use the public key for validation
-                    ValidateIssuerSigningKey = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
+            //services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer(options =>
+            //{
+            //    options.SaveToken = true;
+            //    options.RequireHttpsMetadata = false;
+            //    options.TokenValidationParameters = new TokenValidationParameters()
+            //    {
+            //        ValidateIssuer = true,
+            //        ValidateAudience = true,
+            //        ValidIssuer = systemSettings.JWTConfiguration.ValidIssuer,
+            //        ValidAudience = systemSettings.JWTConfiguration.ValidAudience,
+            //        IssuerSigningKey = publicKey, // Use the public key for validation
+            //        ValidateIssuerSigningKey = true,
+            //        ValidateLifetime = true,
+            //        ClockSkew = TimeSpan.Zero
+            //    };
+            //});
 
             #endregion
 

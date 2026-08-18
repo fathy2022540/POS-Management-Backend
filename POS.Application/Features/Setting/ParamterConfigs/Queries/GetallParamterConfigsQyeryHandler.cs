@@ -1,11 +1,5 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using POS.Application.Common.DTOs;
-using POS.Application.Common.DTOs.ParametersConfiguration;
 using POS.Application.Helper.Mapper;
 using POS.Domain.Entities;
 using POS.Domain.Enums;
@@ -20,7 +14,7 @@ namespace POS.Application.Features.ParamterConfigs.Queries
 
     }
 
-    public class GetallParamterConfigsQyeryHandler (IUnitOfWork<POSDBContext> unitOfWork): IRequestHandler<GetallParamterConfigsQyery, ApiResponses<PaginationResponse<ParamterConfigListRespone>>>
+    public class GetallParamterConfigsQyeryHandler(IUnitOfWork<POSDBContext> unitOfWork) : IRequestHandler<GetallParamterConfigsQyery, ApiResponses<PaginationResponse<ParamterConfigListRespone>>>
     {
         public async Task<ApiResponses<PaginationResponse<ParamterConfigListRespone>>> Handle(GetallParamterConfigsQyery request, CancellationToken cancellationToken)
         {
