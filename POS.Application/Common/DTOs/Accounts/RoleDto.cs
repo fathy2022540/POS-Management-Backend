@@ -1,4 +1,3 @@
-// POS.Application/Common/DTOs/Role/RoleDto.cs
 namespace POS.Application.Common.DTOs
 {
     public class RoleDto
@@ -22,5 +21,11 @@ namespace POS.Application.Common.DTOs
         public DateTime? UpdatedAtUtc { get; set; }
         public List<PermissionDto> Permissions { get; set; } = new();
         public int UserCount { get; set; }
+    }
+
+    public class RoleOptionDto
+    {
+        public string Label { get; set; } = string.Empty;
+        public long Value { get; set; }
     }
 }

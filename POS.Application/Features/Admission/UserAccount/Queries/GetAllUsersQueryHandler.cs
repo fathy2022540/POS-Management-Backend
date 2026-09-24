@@ -1,4 +1,3 @@
-// POS.Application/Features/Users/Queries/GetAllUsers/GetAllUsersQueryHandler.cs
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.DTOs;
@@ -16,6 +15,7 @@ namespace POS.Application.Features.UsersAccount.Queries
         public long? Status { get; set; }
         public long? RoleId { get; set; }
     }
+
     public class GetAllUsersQueryHandler(IUnitOfWork<POSDBContext> unitOfWork)
         : IRequestHandler<GetAllUsersQuery, ApiResponses<PaginationResponse<UserDto>>>
     {
@@ -25,29 +25,30 @@ namespace POS.Application.Features.UsersAccount.Queries
             {
                 var userRepo = unitOfWork.GetRepository<Users>();
 
-                var queryable = userRepo.GetByCriteriaQueryable(x => true);
+                var queryable = userRepo.GetAllQeryable();
 
-                if (!string.IsNullOrEmpty(request.SearchTerm))
-                    queryable = queryable.Where(x => 
-                        x.Email.Contains(request.SearchTerm) || 
-                        x.FullName.Contains(request.SearchTerm));
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.Trim();
+                    queryable = queryable.Where(x =>
+                        (x.Email != null && x.Email.Contains(searchTerm)) ||
+                        (x.FullName != null && x.FullName.Contains(searchTerm)) ||
+                        (x.UserName != null && x.UserName.Contains(searchTerm)));
+                }
 
                 if (request.Status.HasValue)
                     queryable = queryable.Where(x => x.StatusId == request.Status);
 
+                if (request.RoleId.HasValue)
+                    queryable = queryable.Where(x => x.RoleId == request.RoleId);
+
                 var totalCount = await queryable.CountAsync(cancellationToken);
 
-                var users = await userRepo.GetList(
-                    predicate: x => (string.IsNullOrEmpty(request.SearchTerm) || 
-                                   x.Email.Contains(request.SearchTerm) || 
-                                   x.FullName.Contains(request.SearchTerm)) &&
-                                  (!request.Status.HasValue || x.StatusId == request.Status),
-                    orderBy: x => x.OrderBy(u => u.FullName),
-                    include: null,
-                    disableTracking: true,
-                    skip: (request.PageNumber - 1) * request.PageSize,
-                    take: request.PageSize
-                );
+                var users = await queryable
+                    .OrderBy(u => u.FullName)
+                    .Skip((request.PageNumber - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(cancellationToken);
 
                 var mappedUsers = AppMapper.Mapper.Map<IEnumerable<UserDto>>(users);
 
@@ -61,7 +62,7 @@ namespace POS.Application.Features.UsersAccount.Queries
             }
             catch (Exception ex)
             {
-                return ApiResponses<PaginationResponse<UserDto>>.Failure(StatusResult.InvalidRequest,$"Error retrieving users: {ex.Message}");
+                return ApiResponses<PaginationResponse<UserDto>>.Failure(StatusResult.InvalidRequest, $"Error retrieving users: {ex.Message}");
             }
         }
     }

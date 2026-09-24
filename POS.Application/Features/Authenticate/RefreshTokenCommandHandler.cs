@@ -35,13 +35,24 @@ namespace POS.Application.Features.Authenticate
                     return ApiResponses<RefreshTokenModel>.Failure(StatusResult.ModelNotValid, "The refresh token has expired.");
                 }
 
-                // Fetch user from the database directly
+                // 3. Fetch user from database with Cancellation Token and No Tracking
                 var usersRepo = unitOfWork.GetRepository<Users>();
-                var user = await usersRepo.GetFirstOrDefault<Users>(null, u => u.Id == userId, null, null, false);
+                var user = await usersRepo.GetFirstOrDefault<Users>(
+                    predicate: u => u.Id == userId,
+                    disableTracking: true);
 
                 if (user == null)
                 {
-                    return ApiResponses<RefreshTokenModel>.Failure(StatusResult.NotFound, "User not found.");
+                    return ApiResponses<RefreshTokenModel>.Failure(
+                        StatusResult.NotFound,
+                        "User not found.");
+                }
+                // 4. Check User Active Status
+                if (user.IsActive == false)
+                {
+                    return ApiResponses<RefreshTokenModel>.Failure(
+                        StatusResult.LockedOut,
+                        "User account is inactive. Access denied.");
                 }
 
                 var mappedUser = AppMapper.Mapper.Map<UserModel>(user);
@@ -49,7 +60,7 @@ namespace POS.Application.Features.Authenticate
                 var rememberMeClaim = principal.Claims.FirstOrDefault(c => c.Type == Claims.RemeberMe)?.Value;
                 bool.TryParse(rememberMeClaim, out bool rememberMe);
 
-                // 3. Request fresh generation securely
+                // 5. Request fresh generation securely
                 string newRefreshToken = tokenService.GenerateRefreshToken(mappedUser);
                 string newAccessToken = tokenService.GenerateAccessToken(mappedUser, newRefreshToken, rememberMe);
 

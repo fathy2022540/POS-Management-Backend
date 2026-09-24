@@ -7,8 +7,6 @@ using POS.Infrastructure.UnitOfWork;
 
 namespace POS.Application.Features.PermissionServices.Commands
 {
-
-
     public record DeletePermissionCommand(long Id) : IRequest<ApiResponses<bool>>;
 
     public class DeletePermissionCommandHandler(IUnitOfWork<POSDBContext> unitOfWork)
@@ -25,38 +23,29 @@ namespace POS.Application.Features.PermissionServices.Commands
                 return ApiResponses<bool>.Failure(StatusResult.NotFound, "Permission not found.");
             }
 
-            // 2. Fetch linked relations (Make sure tracking is ENABLED for deletions)
+            // 2. Fetch linked relations
             var rolePermissionsRepo = unitOfWork.GetRepository<RolesPermissions>();
-
-            // Explicitly fetch as an active tracking list from the database
             var linkedRelations = await rolePermissionsRepo.GetList(
                 rp => rp.PermissionId == request.Id,
                 null, null,
-                disableTracking: false // MUST BE FALSE so EF can track and remove them!
+                disableTracking: false
             );
 
             var relationsList = linkedRelations.ToList();
 
-            // 3. Delete dependent relations first
+            // 3. Delete dependent relations first (Active code)
             if (relationsList.Any())
             {
-                // IF YOUR REPOSITORY HAS DeleteRange:
-                // await rolePermissionsRepo.DeleteRange(relationsList);
-
-                // IF YOUR REPOSITORY ONLY HAS Delete:
-                // Crucial Fix: In 99% of generic repositories, .Delete() marks the state as Deleted. 
-                // It modifies local state, so do NOT await it inside a loop unless it hits the DB immediately.
                 foreach (var relation in relationsList)
                 {
-                    // If your repo method returns a Task, await it. If it's void, remove 'await'
-                    //  await rolePermissionsRepo.Delete(relation);
+                    await rolePermissionsRepo.Delete(relation);
                 }
             }
 
             // 4. Delete the master permission
             await permissionRepo.Delete(existingPermission);
 
-            // 5. Save everything to the DB in a single atomic transaction
+            // 5. Save everything
             await unitOfWork.DoWork();
 
             return ApiResponses<bool>.Success(true, "Permission deleted successfully.");

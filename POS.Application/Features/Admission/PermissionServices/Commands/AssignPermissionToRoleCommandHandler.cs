@@ -29,12 +29,14 @@ namespace POS.Application.Features.PermissionServices.Commands
             var permissionRepo = unitOfWork.GetRepository<Permissions>();
             var roleExists = await BusinessValidator.FindConflictAsync(roleRepo, r => r.Id == request.RoleId);
             var permissionExists = await BusinessValidator.FindConflictAsync(permissionRepo, p => p.Id == request.PermissionId);
-            if ((roleExists != null) || (permissionExists != null))
+
+            // Fix logic: If EITHER is NULL, then it is NOT FOUND
+            if (roleExists == null || permissionExists == null)
             {
                 return ApiResponses<bool>.Failure(StatusResult.NotFound, "Role or Permission does not exist.");
             }
 
-            // 3. Create mapping relation (Assuming properties on RolesPermissions match standard naming)
+            // 3. Create mapping relation
             var rolePermission = new RolesPermissions
             {
                 RoleId = request.RoleId,

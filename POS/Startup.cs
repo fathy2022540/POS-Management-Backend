@@ -139,18 +139,16 @@ U9VQQSQzY1oZMVX8i1m5WUTLPz2yLJIBQVdXqhMCQBGoiuSoSjafUhV7i1cEGpb88h5NBYZzWXGZ
 
 
             services.AddCors(options =>
-                 {
-                     options.AddPolicy("AllowSpecificOrigins",
-                     builder =>
-                     {
-                         builder.WithOrigins(systemSettings.CorsUrls)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()
-                        .WithExposedHeaders("Content-Disposition");
-
-                     });
-                 });
+            {
+                options.AddPolicy("AllowSpecificOrigins", builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200", "http://localhost:5001")
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials()
+                           .WithExposedHeaders("Content-Disposition");
+                });
+            });
 
             #endregion
             services.AddExceptionHandler<GlobalExceptionHandler>();

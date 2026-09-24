@@ -3,10 +3,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using POS.Application.Common.DTOs;
 using POS.Application.Helper;
+
 namespace POS.Application.Common.Helper.Authentication
 {
     public interface ITokenService
@@ -22,12 +23,12 @@ namespace POS.Application.Common.Helper.Authentication
     {
         private readonly JwtSecurityTokenHandler _tokenHandler = new();
         private readonly JWTConfiguration _jwtConfig = systemSettings.JWTConfiguration;
-        // Reusable helper to generate the RSA key from configuration PEM strings
-        private RsaSecurityKey GetRsaSecurityKey()
+
+        private SecurityKey GetSigningKey()
         {
-            var rsa = RSA.Create();
-            rsa.ImportFromPem(systemSettings.JWTConfiguration.SecretKey.ToCharArray());
-            return new RsaSecurityKey(rsa);
+            string secret = _jwtConfig.SecretKey ?? "POS_System_Default_Super_Secret_Key_2026_Long_Enough";
+            byte[] keyBytes = Encoding.UTF8.GetBytes(secret);
+            return new SymmetricSecurityKey(keyBytes);
         }
 
         private TokenValidationParameters GetValidationParameters() => new()
@@ -35,34 +36,29 @@ namespace POS.Application.Common.Helper.Authentication
             ValidateAudience = false,
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = GetRsaSecurityKey(),
+            IssuerSigningKey = GetSigningKey(),
             ValidateLifetime = false
         };
 
-
         public (string Token, string RefreshToken) GenerateTokens(UserModel user, bool rememberMe, string? existingRefreshToken)
         {
-            var tokenHandler = new JsonWebTokenHandler(); // Upgraded from JwtSecurityTokenHandler
-
-            using var rsa = RSA.Create();
-            rsa.ImportFromPem(_jwtConfig.SecretKey.ToCharArray());
-            var rsaKey = new RsaSecurityKey(rsa);
-            var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+            var tokenHandler = new JsonWebTokenHandler();
+            var signingCredentials = new SigningCredentials(GetSigningKey(), SecurityAlgorithms.HmacSha256Signature);
 
             var utcNow = DateTime.UtcNow;
             var expiresAt = utcNow.AddMinutes(_jwtConfig.AccessExpiration);
-            string userDisplayName = user.UserName.TrimEnd('.');
+            string userDisplayName = user.UserName?.TrimEnd('.') ?? string.Empty;
 
             // 1. Generate Access Token
             var claims = new Dictionary<string, object>
-        {
-            { ClaimTypes.Name, userDisplayName },
-            { ClaimTypes.Email, user.Email },
-            { Claims.UserId, user.Id.ToString() },
-            { Claims.UserData, JsonSerializer.Serialize(UserClaimModel.CreateUserClaimModel(user)) },
-            { Claims.RemeberMe, rememberMe.ToString().ToLower() },
-            { Claims.ExpiresAt, expiresAt.ToString("g", CultureInfo.InvariantCulture) }
-        };
+            {
+                { ClaimTypes.Name, userDisplayName },
+                { ClaimTypes.Email, user.Email ?? string.Empty },
+                { Claims.UserId, user.Id.ToString() },
+                { Claims.UserData, JsonSerializer.Serialize(UserClaimModel.CreateUserClaimModel(user)) },
+                { Claims.RemeberMe, rememberMe.ToString().ToLower() },
+                { Claims.ExpiresAt, expiresAt.ToString("g", CultureInfo.InvariantCulture) }
+            };
 
             if (!string.IsNullOrEmpty(existingRefreshToken))
             {
@@ -98,13 +94,12 @@ namespace POS.Application.Common.Helper.Authentication
 
         public string GenerateAccessToken(UserModel user, string? existingRefreshToken, bool rememberMe)
         {
-            var rsaKey = GetRsaSecurityKey();
-            var expiresAt = DateTime.Now.AddMinutes(systemSettings.JWTConfiguration.AccessExpiration);
+            var expiresAt = DateTime.UtcNow.AddMinutes(systemSettings.JWTConfiguration.AccessExpiration);
 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.UserName.TrimEnd('.'), ClaimValueTypes.String),
-                new(ClaimTypes.Email, user.Email, ClaimValueTypes.String),
+                new(ClaimTypes.Name, user.UserName?.TrimEnd('.') ?? string.Empty, ClaimValueTypes.String),
+                new(ClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String),
                 new(Claims.UserId, user.Id.ToString()),
                 new(Claims.UserData, JsonSerializer.Serialize(UserClaimModel.CreateUserClaimModel(user))),
                 new(Claims.RemeberMe, rememberMe.ToString().ToLower()),
@@ -119,11 +114,11 @@ namespace POS.Application.Common.Helper.Authentication
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                IssuedAt = DateTime.Now,
+                IssuedAt = DateTime.UtcNow,
                 Expires = expiresAt,
                 Issuer = systemSettings.JWTConfiguration.ValidIssuer,
                 Audience = systemSettings.JWTConfiguration.ValidAudience,
-                SigningCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256)
+                SigningCredentials = new SigningCredentials(GetSigningKey(), SecurityAlgorithms.HmacSha256Signature)
             };
 
             return _tokenHandler.WriteToken(_tokenHandler.CreateToken(tokenDescriptor));
@@ -134,8 +129,8 @@ namespace POS.Application.Common.Helper.Authentication
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("userid", user.Id.ToString()) }),
-                Expires = DateTime.Now.AddDays(systemSettings.JWTConfiguration.JWT_RefreshTokenExpiration),
-                SigningCredentials = new SigningCredentials(GetRsaSecurityKey(), SecurityAlgorithms.RsaSha256)
+                Expires = DateTime.UtcNow.AddDays(systemSettings.JWTConfiguration.JWT_RefreshTokenExpiration),
+                SigningCredentials = new SigningCredentials(GetSigningKey(), SecurityAlgorithms.HmacSha256Signature)
             };
 
             return _tokenHandler.WriteToken(_tokenHandler.CreateToken(tokenDescriptor));
@@ -146,7 +141,7 @@ namespace POS.Application.Common.Helper.Authentication
             var principal = _tokenHandler.ValidateToken(token, GetValidationParameters(), out var securityToken);
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase))
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenException("Invalid token signature");
             }

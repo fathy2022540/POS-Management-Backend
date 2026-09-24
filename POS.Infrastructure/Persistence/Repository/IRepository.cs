@@ -43,12 +43,12 @@ namespace POS.Infrastructure.Repository
             IIncludableQueryable<T, object>> include = null,
         bool disableTracking = true);
 
-        public Task<TResult> GetFirstOrDefault<TResult>(
-            Expression<Func<T, TResult>> selector,
-            Expression<Func<T, bool>> predicate,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
-            bool disableTracking);
+        Task<TResult> GetFirstOrDefault<TResult>(
+            Expression<Func<T, TResult?>> selector = null,
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null,
+            bool disableTracking = true);
 
         Task<int> CountAsync(Expression<Func<T, bool>> predicate = null);
 
